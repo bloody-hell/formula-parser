@@ -1,0 +1,14 @@
+{
+    "name": "bloody-hell/formula-parser",
+    "description": "String parser to callable",
+    "keywords": ["parser", "formula", "callable"],
+    "type": "library",
+    "require": {
+        "php": ">=7.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "bloodyHell\\formulaParser\\": "dist"
+        }
+    }
+}
