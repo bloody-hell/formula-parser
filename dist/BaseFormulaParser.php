@@ -5,7 +5,7 @@ namespace bloodyHell\formulaParser;
 use bloodyHell\formulaParser\operands\IFormula;
 
 
-class FormulaParser
+class BaseFormulaParser
 {
     /** @var int */
     private $_counter = 0;
@@ -21,24 +21,13 @@ class FormulaParser
 
     /**
      * FormulaParser constructor.
-     * @param callable[] $values
+     * @param operands\DynamicOperand[] $values
+     * @param operators\IOperator[]     $operators
      */
-    public function __construct (array $values)
+    public function __construct (array $values, array $operators)
     {
-        $this->_values = array_map(function(callable $value){
-
-            return new operands\DynamicOperand($value);
-        }, $values);
-
-        $operatorRegex = '([\da-z:.]*)';
-
-        $this->_operators = [
-            new operators\RegexOperator('@'.$operatorRegex.'\^'.$operatorRegex.'@i', function($a, $b){return pow($a, $b);}),
-            new operators\RegexOperator('@'.$operatorRegex.'\/'.$operatorRegex.'@i', function($a, $b){return $a / $b;}),
-            new operators\RegexOperator('@'.$operatorRegex.'\*'.$operatorRegex.'@i', function($a, $b){return $a * $b;}),
-            new operators\RegexOperator('@'.$operatorRegex.'\-'.$operatorRegex.'@i', function($a, $b){return $a - $b;}),
-            new operators\RegexOperator('@'.$operatorRegex.'\+'.$operatorRegex.'@i', function($a, $b){return $a + $b;}),
-        ];
+        $this->_values    = $values;
+        $this->_operators = $operators;
     }
 
     /**

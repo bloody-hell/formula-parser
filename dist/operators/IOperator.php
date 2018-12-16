@@ -2,10 +2,10 @@
 namespace bloodyHell\formulaParser\operators;
 
 
-use bloodyHell\formulaParser\FormulaParser;
+use bloodyHell\formulaParser\BaseFormulaParser;
 
 
 interface IOperator
 {
-    public function process(FormulaParser $parser, string $formula): string;
+    public function process(BaseFormulaParser $parser, string $formula): string;
 }
