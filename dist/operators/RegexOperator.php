@@ -57,8 +57,8 @@ class RegexOperator implements IOperator
         $callback = function($matches)use($parser){
 
             return $parser->tokenize($this->generateProcessingExpression(
-                $parser->parseOperator($matches[1]),
-                $parser->parseOperator($matches[2])
+                $parser->parseOperand($matches[1]),
+                $parser->parseOperand($matches[2])
             ));
 
         };

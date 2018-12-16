@@ -96,25 +96,25 @@ class FormulaParser
     }
 
     /**
-     * @param string $operator
+     * @param string $operand
      * @return callable|float
      * @throws ParseException
      */
-    public function parseOperator(string $operator)
+    public function parseOperand(string $operand)
     {
-        if(!$operator) {
+        if(!$operand) {
             return 0.0;
         }
-        if(isset($this->_tokens[$operator])) {
-            return $this->_tokens[$operator];
+        if(isset($this->_tokens[$operand])) {
+            return $this->_tokens[$operand];
         }
-        if (isset($this->_values[$operator])) {
-            return $this->_values[$operator];
+        if (isset($this->_values[$operand])) {
+            return $this->_values[$operand];
         }
-        if (is_numeric($operator)) {
-            return (float)$operator;
+        if (is_numeric($operand)) {
+            return (float)$operand;
         }
-        throw new ParseException('Unknown operator type: ' . $operator);
+        throw new ParseException('Unknown operator type: ' . $operand);
     }
 
     /**
