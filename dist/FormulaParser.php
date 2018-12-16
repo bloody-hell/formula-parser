@@ -36,6 +36,11 @@ class FormulaParser
         ];
     }
 
+    /**
+     * @param string $formula
+     * @return callable
+     * @throws \bloodyHell\formulaParser\ParseException
+     */
     public function parse(string $formula): callable
     {
         $this->_counter = 0;
@@ -51,6 +56,13 @@ class FormulaParser
         return $this->parseFlat($formula);
     }
 
+    /**
+     * @param string $formula
+     * @param int    $start
+     * @param int    $end
+     * @return string
+     * @throws \bloodyHell\formulaParser\ParseException
+     */
     private function replaceParenthesisWithToken(string $formula, int $start, int $end): string
     {
         $sub = substr($formula, $start, $end - $start + 1);
@@ -60,6 +72,11 @@ class FormulaParser
         return substr($formula, 0, $start) . $token . substr($formula, $end + 1);
     }
 
+    /**
+     * @param string $formula
+     * @return array|null
+     * @throws \bloodyHell\formulaParser\ParseException
+     */
     private function findParenthesis(string $formula): ?array
     {
         while(false === $end = strpos($formula, ')')) {
@@ -100,6 +117,11 @@ class FormulaParser
         throw new ParseException('Unknown operator type: ' . $operator);
     }
 
+    /**
+     * @param string $formula
+     * @return callable
+     * @throws \bloodyHell\formulaParser\ParseException
+     */
     private function parseFlat(string $formula): callable
     {
         foreach ($this->_operators as $operator) {

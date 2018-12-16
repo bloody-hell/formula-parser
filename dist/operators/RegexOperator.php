@@ -24,44 +24,47 @@ class RegexOperator implements IOperator
         $this->callback = $callback;
     }
 
-    private function replacementCallback(FormulaParser $parser): callable
+    private function generateProcessingExpression($a, $b): callable
     {
-        return function($matches)use($parser){
+        if(is_float($a)) {
+            if(is_float($b)) {
 
-            $a = $parser->parseOperator($matches[1]);
-            $b = $parser->parseOperator($matches[2]);
+                return function()use($a, $b){
+                    return call_user_func($this->callback, $a, $b);
+                };
 
-            if(is_float($a)) {
-                if(is_float($b)) {
-
-                    return $parser->tokenize(function()use($a, $b){
-                        return call_user_func($this->callback, $a, $b);
-                    });
-
-                } else {
-                    return $parser->tokenize(function($item)use($a, $b){
-                        return call_user_func($this->callback, $a, call_user_func($b, $item));
-                    });
-                }
             } else {
-                if(is_float($b)) {
-                    return $parser->tokenize(function($item)use($a, $b){
-                        return call_user_func($this->callback, call_user_func($a, $item), $b);
-                    });
-                } else {
-                    return $parser->tokenize(function($item)use($a, $b){
-                        return call_user_func($this->callback, call_user_func($a, $item), call_user_func($b, $item));
-                    });
-                }
+                return function($item)use($a, $b){
+                    return call_user_func($this->callback, $a, call_user_func($b, $item));
+                };
             }
-
-        };
+        } else {
+            if(is_float($b)) {
+                return function($item)use($a, $b){
+                    return call_user_func($this->callback, call_user_func($a, $item), $b);
+                };
+            } else {
+                return function($item)use($a, $b){
+                    return call_user_func($this->callback, call_user_func($a, $item), call_user_func($b, $item));
+                };
+            }
+        }
     }
+
 
     public function process(FormulaParser $parser, string $formula): string
     {
+        $callback = function($matches)use($parser){
+
+            return $parser->tokenize($this->generateProcessingExpression(
+                $parser->parseOperator($matches[1]),
+                $parser->parseOperator($matches[2])
+            ));
+
+        };
+
         do {
-            $formula = preg_replace_callback($this->regex, $this->replacementCallback($parser), $formula, 1, $count);
+            $formula = preg_replace_callback($this->regex, $callback, $formula, 1, $count);
         } while ($count > 0);
 
         return $formula;
