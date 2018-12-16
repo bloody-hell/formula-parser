@@ -2,16 +2,18 @@
 namespace bloodyHell\formulaParser;
 
 
+use bloodyHell\formulaParser\operands\IFormula;
+
 
 class FormulaParser
 {
     /** @var int */
     private $_counter = 0;
 
-    /** @var callable[] */
+    /** @var \bloodyHell\formulaParser\operands\IFormula[] */
     private $_values = [];
 
-    /** @var callable[] */
+    /** @var \bloodyHell\formulaParser\operands\IFormula[] */
     private $_tokens = [];
 
     /** @var operators\IOperator[] */
@@ -23,7 +25,10 @@ class FormulaParser
      */
     public function __construct (array $values)
     {
-        $this->_values = $values;
+        $this->_values = array_map(function(callable $value){
+
+            return new operands\DynamicOperand($value);
+        }, $values);
 
         $operatorRegex = '([\da-z:.]*)';
 
@@ -38,10 +43,10 @@ class FormulaParser
 
     /**
      * @param string $formula
-     * @return callable
+     * @return IFormula
      * @throws \bloodyHell\formulaParser\ParseException
      */
-    public function parse(string $formula): callable
+    public function parse(string $formula): IFormula
     {
         $this->_counter = 0;
         $this->_tokens = [];
@@ -88,7 +93,7 @@ class FormulaParser
         return [$start, $end];
     }
 
-    public function tokenize(callable $value): string
+    public function tokenize(IFormula $value): string
     {
         $token = ':t'.$this->_counter++;
         $this->_tokens[$token] = $value;
@@ -97,13 +102,13 @@ class FormulaParser
 
     /**
      * @param string $operand
-     * @return callable|float
+     * @return operands\IFormula
      * @throws ParseException
      */
-    public function parseOperand(string $operand)
+    public function parseOperand(string $operand): operands\IFormula
     {
         if(!$operand) {
-            return 0.0;
+            return new operands\StaticOperand(0.0);
         }
         if(isset($this->_tokens[$operand])) {
             return $this->_tokens[$operand];
@@ -112,17 +117,17 @@ class FormulaParser
             return $this->_values[$operand];
         }
         if (is_numeric($operand)) {
-            return (float)$operand;
+            return new operands\StaticOperand((float)$operand);
         }
         throw new ParseException('Unknown operator type: ' . $operand);
     }
 
     /**
      * @param string $formula
-     * @return callable
+     * @return IFormula
      * @throws \bloodyHell\formulaParser\ParseException
      */
-    private function parseFlat(string $formula): callable
+    private function parseFlat(string $formula): IFormula
     {
         foreach ($this->_operators as $operator) {
             $formula = $operator->process($this, $formula);

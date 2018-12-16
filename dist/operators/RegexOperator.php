@@ -3,6 +3,8 @@ namespace bloodyHell\formulaParser\operators;
 
 
 use bloodyHell\formulaParser\FormulaParser;
+use bloodyHell\formulaParser\operands\DynamicOperand;
+use bloodyHell\formulaParser\operands\IFormula;
 
 
 class RegexOperator implements IOperator
@@ -24,31 +26,11 @@ class RegexOperator implements IOperator
         $this->callback = $callback;
     }
 
-    private function generateProcessingExpression($a, $b): callable
+    private function generateProcessingExpression(IFormula $a, IFormula $b): callable
     {
-        if(is_float($a)) {
-            if(is_float($b)) {
-
-                return function()use($a, $b){
-                    return call_user_func($this->callback, $a, $b);
-                };
-
-            } else {
-                return function($item)use($a, $b){
-                    return call_user_func($this->callback, $a, call_user_func($b, $item));
-                };
-            }
-        } else {
-            if(is_float($b)) {
-                return function($item)use($a, $b){
-                    return call_user_func($this->callback, call_user_func($a, $item), $b);
-                };
-            } else {
-                return function($item)use($a, $b){
-                    return call_user_func($this->callback, call_user_func($a, $item), call_user_func($b, $item));
-                };
-            }
-        }
+        return function($item)use($a, $b){
+            return call_user_func($this->callback, $a->generateValue($item), $b->generateValue($item));
+        };
     }
 
 
@@ -56,10 +38,12 @@ class RegexOperator implements IOperator
     {
         $callback = function($matches)use($parser){
 
-            return $parser->tokenize($this->generateProcessingExpression(
+            $expression = $this->generateProcessingExpression(
                 $parser->parseOperand($matches[1]),
                 $parser->parseOperand($matches[2])
-            ));
+            );
+
+            return $parser->tokenize(new DynamicOperand($expression));
 
         };
 
