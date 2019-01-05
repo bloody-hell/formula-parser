@@ -43,8 +43,9 @@ class ExpressionFormulaParser
      */
     public function parse(string $formula): callable
     {
+        $formula = $this->_parser->parse($formula);
         return function($item)use($formula){
-            return $this->_parser->parse($formula)->generateValue($item);
+            return $formula->generateValue($item);
         };
     }
 }
